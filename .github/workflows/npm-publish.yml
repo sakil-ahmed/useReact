@@ -5,20 +5,29 @@ on:
     branches:
       - main
       - next
-  jobs:
-    release:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-node@v4
-          with:
-            node-version: "lts/*"
-        - run: npm-cli
-        - run: pnpm build
-        - name: Release
-          env:
-            GITHUB_TOKEN: ${{secretes.GITHUB_TOKEN}}
-            NPM_TOKEN: ${{secretes.NPM_TOKEN}}
-          run: npx semantic-release
 
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
